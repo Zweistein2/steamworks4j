@@ -47,14 +47,6 @@ public class SteamInventory extends SteamInterface {
         }
     }
 
-    public static class SteamInventoryValue {
-        private String value;
-
-        public String getValue() {
-            return value;
-        }
-    }
-
     public SteamInventory(final SteamInventoryCallback callback) {
         super(SteamAPI.getSteamInventoryPointer(), createCallback(new SteamInventoryCallbackAdapter(callback)));
     }
@@ -93,7 +85,7 @@ public class SteamInventory extends SteamInterface {
     }
 
     public boolean getResultItemProperty(final SteamInventoryHandle inventory, final int itemIndex, final String propertyName, final List<String> values) {
-        final SteamInventoryValue steamValue = new SteamInventoryValue();
+        final SteamStringValue steamValue = new SteamStringValue();
 
         final boolean result = getResultItemProperty(pointer, inventory.handle, itemIndex, propertyName, steamValue);
 
@@ -296,7 +288,7 @@ public class SteamInventory extends SteamInterface {
     }
 
     public boolean getItemDefinitionProperty(final int itemDefinition, final String propertyName, final List<String> values) {
-        final SteamInventoryValue steamValue = new SteamInventoryValue();
+        final SteamStringValue steamValue = new SteamStringValue();
 
         final boolean result = getItemDefinitionProperty(pointer, itemDefinition, propertyName, steamValue);
 
@@ -464,7 +456,7 @@ public class SteamInventory extends SteamInterface {
 		return env->NewStringUTF(valueBuffer);
 	*/
 
-    private static native boolean getResultItemProperty(long pointer, int resultHandle, int itemIndex, String propertyName, SteamInventoryValue value); /*
+    private static native boolean getResultItemProperty(long pointer, int resultHandle, int itemIndex, String propertyName, SteamStringValue value); /*
 		ISteamInventory* inventory = (ISteamInventory*) pointer;
 		char *valueBuffer = (char*) malloc(1);
 		uint32 valueBufferSizeOut = 0;
@@ -610,7 +602,7 @@ public class SteamInventory extends SteamInterface {
 		return env->NewStringUTF(valueBuffer);
 	*/
 
-    private static native boolean getItemDefinitionProperty(long pointer, int itemDefinition, String propertyName, SteamInventoryValue value); /*
+    private static native boolean getItemDefinitionProperty(long pointer, int itemDefinition, String propertyName, SteamStringValue value); /*
 		ISteamInventory* inventory = (ISteamInventory*) pointer;
 		char *valueBuffer = (char*) malloc(1);
 		uint32 valueBufferSizeOut = 0;
