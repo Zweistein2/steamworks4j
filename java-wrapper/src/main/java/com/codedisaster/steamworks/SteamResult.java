@@ -130,11 +130,11 @@ public enum SteamResult {
 	private final int code;
 	private static final SteamResult[] valuesLookupTable;
 
-	SteamResult(int code) {
+	SteamResult(final int code) {
 		this.code = code;
 	}
 
-	public static SteamResult byValue(int resultCode) {
+	public static SteamResult byValue(final int resultCode) {
 		if (resultCode < valuesLookupTable.length) {
 			return valuesLookupTable[resultCode];
 		} else {
@@ -143,16 +143,16 @@ public enum SteamResult {
 	}
 
 	static {
-		SteamResult[] values = values();
+		final SteamResult[] values = values();
 		int maxResultCode = 0;
 
-		for (SteamResult value : values) {
+		for (final SteamResult value : values) {
 			maxResultCode = Math.max(maxResultCode, value.code);
 		}
 
 		valuesLookupTable = new SteamResult[maxResultCode + 1];
 
-		for (SteamResult value : values) {
+		for (final SteamResult value : values) {
 			valuesLookupTable[value.code] = value;
 		}
 	}

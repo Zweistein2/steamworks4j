@@ -1,6 +1,7 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.controller.*;
 
 import static com.codedisaster.steamworks.SteamNativeHandle.getNativeHandle;
 
@@ -10,33 +11,33 @@ public class SteamControllerTest extends SteamTestApp {
 	private SteamControllerHandle[] controllerHandles = {};
 	private int numControllers = 0;
 
-	private SteamControllerMotionData motionData = new SteamControllerMotionData();
-	private long motionDataLastTime = System.currentTimeMillis();
+	private final SteamControllerMotionData motionData = new SteamControllerMotionData();
+	private final long motionDataLastTime = System.currentTimeMillis();
 
 	private SteamControllerActionSetHandle setHandle;
 
 	private SteamControllerDigitalActionHandle digitalActionHandle;
-	private SteamControllerDigitalActionData digitalActionData = new SteamControllerDigitalActionData();
+	private final SteamControllerDigitalActionData digitalActionData = new SteamControllerDigitalActionData();
 
 	private SteamControllerAnalogActionHandle analogActionHandle;
-	private SteamControllerAnalogActionData analogActionData = new SteamControllerAnalogActionData();
+	private final SteamControllerAnalogActionData analogActionData = new SteamControllerAnalogActionData();
 
 	@Override
 	protected void registerInterfaces() {
 		System.out.println("Register controller API ...");
 		controller = new SteamController();
-		controller.init();
+		controller.initController();
 
 		try {
 			processInput("c list");
-		} catch (SteamException e) {
+		} catch (final SteamException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	protected void unregisterInterfaces() {
-		controller.shutdown();
+		controller.shutdownController();
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class SteamControllerTest extends SteamTestApp {
 		}
 
 		for (int i = 0; i < numControllers; i++) {
-			SteamControllerHandle handle = controllerHandles[i];
+			final SteamControllerHandle handle = controllerHandles[i];
 			controller.activateActionSet(handle, setHandle);
 
 			/*long time = System.currentTimeMillis();
@@ -79,9 +80,9 @@ public class SteamControllerTest extends SteamTestApp {
 			if (analogActionHandle != null) {
 				controller.getAnalogActionData(handle, analogActionHandle, analogActionData);
 				if (analogActionData.getActive()) {
-					float x = analogActionData.getX();
-					float y = analogActionData.getY();
-					SteamController.SourceMode mode = analogActionData.getMode();
+					final float x = analogActionData.getX();
+					final float y = analogActionData.getY();
+					final SteamController.SourceMode mode = analogActionData.getMode();
 					if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {
 						System.out.println("  analog action: " + analogActionData.getX() +
 								", " + analogActionData.getY() + ", " + mode.name());
@@ -92,7 +93,7 @@ public class SteamControllerTest extends SteamTestApp {
 	}
 
 	@Override
-	protected void processInput(String input) throws SteamException {
+	protected void processInput(final String input) throws SteamException {
 		if (input.equals("c list")) {
 			controllerHandles = new SteamControllerHandle[SteamController.STEAM_CONTROLLER_MAX_COUNT];
 			numControllers = controller.getConnectedControllers(controllerHandles);
@@ -102,9 +103,9 @@ public class SteamControllerTest extends SteamTestApp {
 				System.out.println("  " + i + ": " + controllerHandles[i]);
 			}
 		} else if (input.startsWith("c pulse ")) {
-			String[] params = input.substring("controller pulse ".length()).split(" ");
+			final String[] params = input.substring("controller pulse ".length()).split(" ");
 			if (params.length > 1) {
-				SteamController.Pad pad = "left".equals(params[0]) ? SteamController.Pad.Left : SteamController.Pad.Right;
+				final SteamController.Pad pad = "left".equals(params[0]) ? SteamController.Pad.Left : SteamController.Pad.Right;
 				if (params.length == 2) {
 					controller.triggerHapticPulse(controllerHandles[0], pad, Short.parseShort(params[1]));
 				} else if (params.length == 4) {
@@ -113,21 +114,21 @@ public class SteamControllerTest extends SteamTestApp {
 				}
 			}
 		} else if (input.startsWith("c set ")) {
-			String setName = input.substring("c set ".length());
+			final String setName = input.substring("c set ".length());
 			setHandle = controller.getActionSetHandle(setName);
 			System.out.println("  handle for set '" + setName + "': " + getNativeHandle(setHandle));
 		} else if (input.startsWith("c d action ")) {
-			String actionName = input.substring("c d action ".length());
+			final String actionName = input.substring("c d action ".length());
 			digitalActionHandle = controller.getDigitalActionHandle(actionName);
 			System.out.println("  handle for digital '" + actionName + "': " + getNativeHandle(digitalActionHandle));
 		} else if (input.startsWith("c a action ")) {
-			String actionName = input.substring("c a action ".length());
+			final String actionName = input.substring("c a action ".length());
 			analogActionHandle = controller.getAnalogActionHandle(actionName);
 			System.out.println("  handle for analog '" + actionName + "': " + getNativeHandle(analogActionHandle));
 		}
 	}
 
-	public static void main(String[] arguments) {
+	public static void main(final String[] arguments) {
 		new SteamControllerTest().clientMain(arguments);
 	}
 

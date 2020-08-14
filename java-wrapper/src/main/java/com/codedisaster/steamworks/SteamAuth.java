@@ -15,7 +15,7 @@ public class SteamAuth {
 
 		private static final BeginAuthSessionResult[] values = values();
 
-		static BeginAuthSessionResult byOrdinal(int authSessionResponse) {
+		public static BeginAuthSessionResult byOrdinal(final int authSessionResponse) {
 			return values[authSessionResponse];
 		}
 	}
@@ -34,7 +34,7 @@ public class SteamAuth {
 
 		private static final AuthSessionResponse[] values = values();
 
-		static AuthSessionResponse byOrdinal(int authSessionResponse) {
+		public static AuthSessionResponse byOrdinal(final int authSessionResponse) {
 			return values[authSessionResponse];
 		}
 	}
@@ -46,7 +46,7 @@ public class SteamAuth {
 
 		private static final UserHasLicenseForAppResult[] values = values();
 
-		static UserHasLicenseForAppResult byOrdinal(int result) {
+		public static UserHasLicenseForAppResult byOrdinal(final int result) {
 			return values[result];
 		}
 	}

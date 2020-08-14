@@ -11,14 +11,13 @@ public class SteamAPI {
 		loadLibraries(null);
 	}
 
-	public static void loadLibraries(String libraryPath) throws SteamException {
-
+	public static void loadLibraries(final String libraryPath) throws SteamException {
 		if (isNativeAPILoaded) {
 			return;
 		}
 
 		if (libraryPath == null && SteamSharedLibraryLoader.DEBUG) {
-			String sdkPath = SteamSharedLibraryLoader.getSdkRedistributableBinPath();
+			final String sdkPath = SteamSharedLibraryLoader.getSdkRedistributableBinPath();
 			SteamSharedLibraryLoader.loadLibrary("steam_api", sdkPath);
 		} else {
 			SteamSharedLibraryLoader.loadLibrary("steam_api", libraryPath);
@@ -33,7 +32,7 @@ public class SteamAPI {
 		isNativeAPILoaded = true;
 	}
 
-	public static boolean restartAppIfNecessary(int appId) throws SteamException {
+	public static boolean restartAppIfNecessary(final int appId) throws SteamException {
 
 		if (!isNativeAPILoaded) {
 			throw new SteamException("Native libraries not loaded.\nEnsure to call SteamAPI.loadLibraries() first!");
@@ -43,7 +42,6 @@ public class SteamAPI {
 	}
 
 	public static boolean init() throws SteamException {
-
 		if (!isNativeAPILoaded) {
 			throw new SteamException("Native libraries not loaded.\nEnsure to call SteamAPI.loadLibraries() first!");
 		}
@@ -70,11 +68,11 @@ public class SteamAPI {
 		return isSteamRunning(false);
 	}
 
-	public static boolean isSteamRunning(boolean checkNative) {
+	public static boolean isSteamRunning(final boolean checkNative) {
 		return isRunning && (!checkNative || isSteamRunningNative());
 	}
 
-	public static void printDebugInfo(PrintStream stream) {
+	public static void printDebugInfo(final PrintStream stream) {
 		stream.println("  Steam API initialized: " + isRunning);
 		stream.println("  Steam client active: " + isSteamRunning());
 	}
@@ -119,59 +117,59 @@ public class SteamAPI {
 		return SteamAPI_IsSteamRunning();
 	*/
 
-	static native long getSteamAppsPointer(); /*
+	protected static native long getSteamAppsPointer(); /*
 		return (intp) SteamApps();
 	*/
 
-	static native long getSteamControllerPointer(); /*
+	protected static native long getSteamControllerPointer(); /*
 		return (intp) SteamController();
 	*/
 
-	static native long getSteamFriendsPointer(); /*
+	protected static native long getSteamFriendsPointer(); /*
 		return (intp) SteamFriends();
 	*/
 
-	static native long getSteamHTTPPointer(); /*
+	protected static native long getSteamHTTPPointer(); /*
 		return (intp) SteamHTTP();
 	*/
 
-	static native long getSteamInventoryPointer(); /*
+	protected static native long getSteamInventoryPointer(); /*
 		return (intp) SteamInventory();
 	*/
 
-	static native long getSteamMatchmakingPointer(); /*
+	protected static native long getSteamMatchmakingPointer(); /*
 		return (intp) SteamMatchmaking();
 	*/
 
-	static native long getSteamMatchmakingServersPointer(); /*
+	protected static native long getSteamMatchmakingServersPointer(); /*
 		return (intp) SteamMatchmakingServers();
 	*/
 
-	static native long getSteamNetworkingPointer(); /*
+	protected static native long getSteamNetworkingPointer(); /*
 		return (intp) SteamNetworking();
 	*/
 
-	static native long getSteamRemoteStoragePointer(); /*
+	protected static native long getSteamRemoteStoragePointer(); /*
 		return (intp) SteamRemoteStorage();
 	*/
 
-	static native long getSteamScreenshotsPointer(); /*
+	protected static native long getSteamScreenshotsPointer(); /*
 		return (intp) SteamScreenshots();
 	*/
 
-	static native long getSteamUGCPointer(); /*
+	protected static native long getSteamUGCPointer(); /*
 		return (intp) SteamUGC();
 	*/
 
-	static native long getSteamUserPointer(); /*
+	protected static native long getSteamUserPointer(); /*
 		return (intp) SteamUser();
 	*/
 
-	static native long getSteamUserStatsPointer(); /*
+	protected static native long getSteamUserStatsPointer(); /*
 		return (intp) SteamUserStats();
 	*/
 
-	static native long getSteamUtilsPointer(); /*
+	protected static native long getSteamUtilsPointer(); /*
 		return (intp) SteamUtils();
 	*/
 

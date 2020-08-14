@@ -7,15 +7,15 @@ public class SteamException extends Exception {
 		super();
 	}
 
-	public SteamException(String message) {
+	public SteamException(final String message) {
 		super(message);
 	}
 
-	public SteamException(String message, Throwable throwable) {
+	public SteamException(final String message, final Throwable throwable) {
 		super(message, throwable);
 	}
 
-	public SteamException(Throwable throwable) {
+	public SteamException(final Throwable throwable) {
 		super(throwable);
 	}
 

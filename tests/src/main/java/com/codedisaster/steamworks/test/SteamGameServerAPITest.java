@@ -20,11 +20,11 @@ public class SteamGameServerAPITest extends SteamTestApp {
     }
 
     @Override
-    protected void processInput(String input) throws SteamException {
+    protected void processInput(final String input) throws SteamException {
 
     }
 
-    public static void main(String[] arguments) {
+    public static void main(final String[] arguments) {
         new SteamGameServerAPITest().serverMain(arguments);
     }
 

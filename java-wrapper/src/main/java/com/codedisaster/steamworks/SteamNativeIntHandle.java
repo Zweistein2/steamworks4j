@@ -2,16 +2,16 @@ package com.codedisaster.steamworks;
 
 public abstract class SteamNativeIntHandle {
 
-	int handle;
+	public final int handle;
 
-	SteamNativeIntHandle(int handle) {
+	protected SteamNativeIntHandle(final int handle) {
 		this.handle = handle;
 	}
 
 	/**
 	 * Returns the unsigned 32-bit value wrapped by this handle, cast to Java's signed int.
 	 */
-	public static <T extends SteamNativeIntHandle> int getNativeHandle(T handle) {
+	public static <T extends SteamNativeIntHandle> int getNativeHandle(final T handle) {
 		return handle.handle;
 	}
 
@@ -21,7 +21,7 @@ public abstract class SteamNativeIntHandle {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		if (other instanceof SteamNativeIntHandle) {
 			return handle == ((SteamNativeIntHandle) other).handle;
 		}

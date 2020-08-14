@@ -2,9 +2,9 @@ package com.codedisaster.steamworks;
 
 public class SteamAuthTicket extends SteamNativeHandle {
 
-	static final long AuthTicketInvalid = 0;
+	public static final long AuthTicketInvalid = 0;
 
-	SteamAuthTicket(long handle) {
+	public SteamAuthTicket(final long handle) {
 		super(handle);
 	}
 

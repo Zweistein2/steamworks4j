@@ -2,7 +2,9 @@
 
 ### HEAD
 - Updated to Steamworks SDK v1.49.
-- Added SteamInventory interface.
+- Updated to Java 1.8.
+- Complete overhaul of the internal structure.
+- Added SteamInventory interface. (#92)
 - Added `SteamUserCallback.onAuthSessionTicket()`. (#83)
 
 ### [1.8.0]

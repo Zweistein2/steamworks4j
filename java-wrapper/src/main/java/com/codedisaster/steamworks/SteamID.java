@@ -8,19 +8,19 @@ public class SteamID extends SteamNativeHandle {
 		super(InvalidSteamID);
 	}
 
-	public SteamID(SteamID steamID) {
+	public SteamID(final SteamID steamID) {
 		super(steamID.handle);
 	}
 
 	/**
-	 * This constructor is package-private to not invite user applications to persist and recover ID values
+	 * This constructor is private to not invite user applications to persist and recover ID values
 	 * manually. Instead, Steamworks API functions should always be used to obtain valid steam IDs.
 	 * <p>
 	 * If you need to serialize IDs, e.g. for client/server communication, use the static functions
 	 * {@link SteamNativeHandle#getNativeHandle(SteamNativeHandle)} and {@link SteamID#createFromNativeHandle(long)}
 	 * instead.
 	 */
-	SteamID(long id) {
+	private SteamID(final long id) {
 		super(id);
 	}
 
@@ -36,7 +36,7 @@ public class SteamID extends SteamNativeHandle {
 	 * Creates a SteamID instance from a long value previously obtained by
 	 * {@link SteamNativeHandle#getNativeHandle(SteamNativeHandle)}.
 	 */
-	public static SteamID createFromNativeHandle(long id) {
+	public static SteamID createFromNativeHandle(final long id) {
 		return new SteamID(id);
 	}
 

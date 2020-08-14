@@ -1,6 +1,10 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.gameserver.SteamGameServerAPI;
+import com.codedisaster.steamworks.utils.SteamAPIWarningMessageHook;
+import com.codedisaster.steamworks.utils.SteamUtils;
+import com.codedisaster.steamworks.utils.SteamUtilsCallback;
 
 import java.util.Scanner;
 
@@ -10,27 +14,17 @@ public abstract class SteamTestApp {
 
 	protected static final int MS_PER_TICK = 1000 / 15;
 
-	private SteamAPIWarningMessageHook clMessageHook = new SteamAPIWarningMessageHook() {
-		@Override
-		public void onWarningMessage(int severity, String message) {
-			System.err.println("[client debug message] (" + severity + ") " + message);
-		}
-	};
+	private final SteamAPIWarningMessageHook clMessageHook = (severity, message) -> System.err.println("[client debug message] (" + severity + ") " + message);
 
-	private SteamUtilsCallback clUtilsCallback = new SteamUtilsCallback() {
-		@Override
-		public void onSteamShutdown() {
-			System.err.println("Steam client requested to shut down!");
-		}
-	};
+	private final SteamUtilsCallback clUtilsCallback = () -> System.err.println("Steam client requested to shut down!");
 
 	private class InputHandler implements Runnable {
 
 		private volatile boolean alive;
-		private Thread mainThread;
-		private Scanner scanner;
+		private final Thread mainThread;
+		private final Scanner scanner;
 
-		public InputHandler(Thread mainThread) {
+		public InputHandler(final Thread mainThread) {
 			this.alive = true;
 			this.mainThread = mainThread;
 
@@ -43,19 +37,19 @@ public abstract class SteamTestApp {
 			try {
 				while (alive && mainThread.isAlive()) {
 					if (scanner.hasNext()) {
-						String input = scanner.next();
+						final String input = scanner.next();
 						if (input.equals("quit") || input.equals("exit")) {
 							alive = false;
 						} else {
 							try {
 								processInput(input);
-							} catch (NumberFormatException e) {
+							} catch (final NumberFormatException e) {
 								e.printStackTrace();
 							}
 						}
 					}
 				}
-			} catch (SteamException e) {
+			} catch (final SteamException e) {
 				e.printStackTrace();
 			}
 		}
@@ -73,7 +67,7 @@ public abstract class SteamTestApp {
 
 	protected abstract void processInput(String input) throws SteamException;
 
-	private boolean runAsClient(@SuppressWarnings("unused") String[] arguments) throws SteamException {
+	private boolean runAsClient(@SuppressWarnings("unused") final String[] arguments) throws SteamException {
 
 		System.out.println("Load native libraries ...");
 
@@ -99,9 +93,9 @@ public abstract class SteamTestApp {
 			System.out.println("SteamAPI_RestartAppIfNecessary returned 'false'");
 		}
 
-		InputHandler inputHandler = new InputHandler(Thread.currentThread());
+		final InputHandler inputHandler = new InputHandler(Thread.currentThread());
 
-		Thread inputThread = new Thread(inputHandler);
+		final Thread inputThread = new Thread(inputHandler);
 		inputThread.start();
 
 		while (inputHandler.alive() && SteamAPI.isSteamRunning()) {
@@ -113,7 +107,7 @@ public abstract class SteamTestApp {
 			try {
 				// sleep a little (Steam says it should poll at least 15 times/second)
 				Thread.sleep(MS_PER_TICK);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// ignore
 			}
 		}
@@ -122,7 +116,7 @@ public abstract class SteamTestApp {
 
 		try {
 			inputThread.join();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new SteamException(e);
 		}
 
@@ -135,7 +129,7 @@ public abstract class SteamTestApp {
 		return true;
 	}
 
-	protected void clientMain(String[] arguments) {
+	protected void clientMain(final String[] arguments) {
 
 		// development mode, read Steamworks libraries from ./sdk folder
 		System.setProperty("com.codedisaster.steamworks.Debug", "true");
@@ -148,19 +142,20 @@ public abstract class SteamTestApp {
 
 			System.out.println("Bye!");
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
 	}
 
-	private boolean runAsGameServer(String[] arguments) throws SteamException {
+	private boolean runAsGameServer(final String[] arguments) throws SteamException {
 
 		boolean dedicated = false;
 
-		for (String arg : arguments) {
-			if (arg.equals("--dedicated")) {
+		for (final String arg : arguments) {
+			if(arg.equals("--dedicated")) {
 				dedicated = true;
+				break;
 			}
 		}
 
@@ -188,9 +183,9 @@ public abstract class SteamTestApp {
 
 		registerInterfaces();
 
-		InputHandler inputHandler = new InputHandler(Thread.currentThread());
+		final InputHandler inputHandler = new InputHandler(Thread.currentThread());
 
-		Thread inputThread = new Thread(inputHandler);
+		final Thread inputThread = new Thread(inputHandler);
 		inputThread.start();
 
 		while (inputHandler.alive()) {
@@ -206,7 +201,7 @@ public abstract class SteamTestApp {
 			try {
 				// sleep a little (Steam says it should poll at least 15 times/second)
 				Thread.sleep(MS_PER_TICK);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				// ignore
 			}
 		}
@@ -215,7 +210,7 @@ public abstract class SteamTestApp {
 
 		try {
 			inputThread.join();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new SteamException(e);
 		}
 
@@ -231,7 +226,7 @@ public abstract class SteamTestApp {
 		return true;
 	}
 
-	protected void serverMain(String[] arguments) {
+	protected void serverMain(final String[] arguments) {
 
 		// development mode, read Steamworks libraries from ./sdk folder
 		System.setProperty("com.codedisaster.steamworks.Debug", "true");
@@ -244,7 +239,7 @@ public abstract class SteamTestApp {
 
 			System.out.println("Bye!");
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}

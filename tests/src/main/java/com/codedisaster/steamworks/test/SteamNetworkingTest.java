@@ -1,17 +1,22 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.networking.SteamNetworking;
+import com.codedisaster.steamworks.networking.SteamNetworkingCallback;
 import com.codedisaster.steamworks.test.mixin.FriendsMixin;
+import com.codedisaster.steamworks.user.SteamUser;
+import com.codedisaster.steamworks.user.SteamUserCallback;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SteamNetworkingTest extends SteamTestApp {
 
 	private static final int defaultChannel = 1;
-	private static final Charset messageCharset = Charset.forName("UTF-8");
+	private static final Charset messageCharset = StandardCharsets.UTF_8;
 
 	private static final int readBufferCapacity = 4096;
 	private static final int sendBufferCapacity = 4096;
@@ -19,30 +24,30 @@ public class SteamNetworkingTest extends SteamTestApp {
 	private FriendsMixin friends;
 	private SteamNetworking networking;
 
-	private ByteBuffer packetReadBuffer = ByteBuffer.allocateDirect(readBufferCapacity);
-	private ByteBuffer packetSendBuffer = ByteBuffer.allocateDirect(sendBufferCapacity);
+	private final ByteBuffer packetReadBuffer = ByteBuffer.allocateDirect(readBufferCapacity);
+	private final ByteBuffer packetSendBuffer = ByteBuffer.allocateDirect(sendBufferCapacity);
 
 	private SteamUser user;
-	private Map<Integer, SteamID> remoteUserIDs = new ConcurrentHashMap<Integer, SteamID>();
+	private final Map<Integer, SteamID> remoteUserIDs = new ConcurrentHashMap<>();
 
 	private SteamAuthTicket userAuthTicket;
-	private ByteBuffer userAuthTicketData = ByteBuffer.allocateDirect(256);
+	private final ByteBuffer userAuthTicketData = ByteBuffer.allocateDirect(256);
 
 	private SteamID remoteAuthUser;
-	private ByteBuffer remoteAuthTicketData = ByteBuffer.allocateDirect(256);
+	private final ByteBuffer remoteAuthTicketData = ByteBuffer.allocateDirect(256);
 
 	private final byte[] AUTH = "AUTH".getBytes(Charset.defaultCharset());
 
-	private SteamUserCallback userCallback = new SteamUserCallback() {
+	private final SteamUserCallback userCallback = new SteamUserCallback() {
 		@Override
-		public void onAuthSessionTicket(SteamAuthTicket authTicket, SteamResult result) {
+		public void onAuthSessionTicket(final SteamAuthTicket authTicket, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onValidateAuthTicket(SteamID steamID,
-										 SteamAuth.AuthSessionResponse authSessionResponse,
-										 SteamID ownerSteamID) {
+		public void onValidateAuthTicket(final SteamID steamID,
+										 final SteamAuth.AuthSessionResponse authSessionResponse,
+										 final SteamID ownerSteamID) {
 
 			System.out.println("Auth session response for userID " + steamID.getAccountID() + ": " +
 					authSessionResponse.name() + ", borrowed=" + (steamID.equals(ownerSteamID) ? "yes" : "no"));
@@ -54,19 +59,19 @@ public class SteamNetworkingTest extends SteamTestApp {
 		}
 
 		@Override
-		public void onMicroTxnAuthorization(int appID, long orderID, boolean authorized) {
+		public void onMicroTxnAuthorization(final int appID, final long orderID, final boolean authorized) {
 
 		}
 
 		@Override
-		public void onEncryptedAppTicket(SteamResult result) {
+		public void onEncryptedAppTicket(final SteamResult result) {
 
 		}
 	};
 
-	private SteamNetworkingCallback peer2peerCallback = new SteamNetworkingCallback() {
+	private final SteamNetworkingCallback peer2peerCallback = new SteamNetworkingCallback() {
 		@Override
-		public void onP2PSessionConnectFail(SteamID steamIDRemote, SteamNetworking.P2PSessionError sessionError) {
+		public void onP2PSessionConnectFail(final SteamID steamIDRemote, final SteamNetworking.P2PSessionError sessionError) {
 			System.out.println("P2P connection failed: userID=" + steamIDRemote.getAccountID() +
 					", error: " + sessionError);
 
@@ -74,7 +79,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 		}
 
 		@Override
-		public void onP2PSessionRequest(SteamID steamIDRemote) {
+		public void onP2PSessionRequest(final SteamID steamIDRemote) {
 			System.out.println("P2P connection requested by userID " + steamIDRemote.getAccountID());
 			registerRemoteSteamID(steamIDRemote);
 			networking.acceptP2PSessionWithUser(steamIDRemote);
@@ -102,11 +107,11 @@ public class SteamNetworkingTest extends SteamTestApp {
 	@Override
 	protected void processUpdate() throws SteamException {
 
-		int packetSize = networking.isP2PPacketAvailable(defaultChannel);
+		final int packetSize = networking.isP2PPacketAvailable(defaultChannel);
 
 		if (packetSize > 0) {
 
-			SteamID steamIDSender = new SteamID();
+			final SteamID steamIDSender = new SteamID();
 
 			packetReadBuffer.clear();
 
@@ -115,14 +120,14 @@ public class SteamNetworkingTest extends SteamTestApp {
 				// register, if unknown
 				registerRemoteSteamID(steamIDSender);
 
-				int bytesReceived = packetReadBuffer.limit();
+				final int bytesReceived = packetReadBuffer.limit();
 				System.out.println("Rcv packet: userID=" + steamIDSender.getAccountID() + ", " + bytesReceived + " bytes");
 
-				byte[] bytes = new byte[bytesReceived];
+				final byte[] bytes = new byte[bytesReceived];
 				packetReadBuffer.get(bytes);
 
 				// check for magic bytes first
-				int magicBytes = checkMagicBytes(packetReadBuffer, AUTH);
+				final int magicBytes = checkMagicBytes(packetReadBuffer, AUTH);
 				if (magicBytes > 0) {
 					// extract ticket
 					remoteAuthTicketData.clear();
@@ -134,7 +139,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 					beginAuthSession(steamIDSender);
 				} else {
 					// plain text message
-					String message = new String(bytes, messageCharset);
+					final String message = new String(bytes, messageCharset);
 					System.out.println("Rcv message: \"" + message + "\"");
 				}
 			}
@@ -144,11 +149,11 @@ public class SteamNetworkingTest extends SteamTestApp {
 	}
 
 	@Override
-	protected void processInput(String input) throws SteamException {
+	protected void processInput(final String input) throws SteamException {
 
 		if (input.startsWith("p2p send ")) {
-			String[] params = input.substring("p2p send ".length()).split(" ");
-			int receiverID = Integer.parseInt(params[0]);
+			final String[] params = input.substring("p2p send ".length()).split(" ");
+			final int receiverID = Integer.parseInt(params[0]);
 
 			SteamID steamIDReceiver = null;
 			if (remoteUserIDs.containsKey(receiverID)) {
@@ -164,7 +169,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 				packetSendBuffer.clear(); // pos=0, limit=cap
 
 				for (int i = 1; i < params.length; i++) {
-					byte[] bytes = params[i].getBytes(messageCharset);
+					final byte[] bytes = params[i].getBytes(messageCharset);
 					if (i > 1) {
 						packetSendBuffer.put((byte) 0x20);
 					}
@@ -177,7 +182,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 						SteamNetworking.P2PSend.Unreliable, defaultChannel);
 			}
 		} else if (input.startsWith("p2p close ")) {
-			int remoteID = Integer.parseInt(input.substring("p2p close ".length()));
+			final int remoteID = Integer.parseInt(input.substring("p2p close ".length()));
 
 			SteamID steamIDRemote = null;
 			if (remoteUserIDs.containsKey(remoteID)) {
@@ -195,42 +200,47 @@ public class SteamNetworkingTest extends SteamTestApp {
 			if (remoteUserIDs.size() == 0) {
 				System.out.println("  none");
 			}
-			for (SteamID steamIDUser : remoteUserIDs.values()) {
+			for (final SteamID steamIDUser : remoteUserIDs.values()) {
 				System.out.println("  " + steamIDUser.getAccountID());
 			}
 		} else if (input.startsWith("auth ticket ")) {
-			String authCmd = input.substring("auth ticket ".length());
-			if (authCmd.equals("get")) {
-				getAuthTicket();
-			} else if (authCmd.equals("cancel")) {
-				cancelAuthTicket();
-			} else if (authCmd.equals("send")) {
-				broadcastAuthTicket();
-			} else if (authCmd.equals("end")) {
-				endAuthSession();
+			final String authCmd = input.substring("auth ticket ".length());
+			switch(authCmd) {
+				case "get":
+					getAuthTicket();
+					break;
+				case "cancel":
+					cancelAuthTicket();
+					break;
+				case "send":
+					broadcastAuthTicket();
+					break;
+				case "end":
+					endAuthSession();
+					break;
 			}
 		}
 
 		friends.processInput(input);
 	}
 
-	private void registerRemoteSteamID(SteamID steamIDUser) {
+	private void registerRemoteSteamID(final SteamID steamIDUser) {
 		if (!remoteUserIDs.containsKey(steamIDUser.getAccountID())) {
 			remoteUserIDs.put(steamIDUser.getAccountID(), steamIDUser);
 		}
 	}
 
-	private void unregisterRemoteSteamID(SteamID steamIDUser) {
+	private void unregisterRemoteSteamID(final SteamID steamIDUser) {
 		remoteUserIDs.remove(steamIDUser.getAccountID());
 	}
 
 	private void getAuthTicket() throws SteamException {
 		cancelAuthTicket();
 		userAuthTicketData.clear();
-		int[] sizeRequired = new int[1];
+		final int[] sizeRequired = new int[1];
 		userAuthTicket = user.getAuthSessionTicket(userAuthTicketData, sizeRequired);
 		if (userAuthTicket.isValid()) {
-			int numBytes = userAuthTicketData.limit();
+			final int numBytes = userAuthTicketData.limit();
 			System.out.println("Auth session ticket length: " + numBytes);
 			System.out.println("Auth ticket created: " + userAuthTicketData.toString() +
 					" [hash: " + userAuthTicketData.hashCode() + "]");
@@ -251,7 +261,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 		}
 	}
 
-	private void beginAuthSession(SteamID steamIDSender) throws SteamException {
+	private void beginAuthSession(final SteamID steamIDSender) throws SteamException {
 		endAuthSession();
 		System.out.println("Starting auth session with user: " + steamIDSender.getAccountID());
 		remoteAuthUser = steamIDSender;
@@ -272,7 +282,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 			return;
 		}
 
-		for (Map.Entry<Integer, SteamID> remoteUser : remoteUserIDs.entrySet()) {
+		for (final Map.Entry<Integer, SteamID> remoteUser : remoteUserIDs.entrySet()) {
 
 			System.out.println("Send auth to remote user: " + remoteUser.getKey() +
 					"[hash: " + userAuthTicketData.hashCode() + "]");
@@ -286,11 +296,11 @@ public class SteamNetworkingTest extends SteamTestApp {
 			packetSendBuffer.flip(); // limit=pos, pos=0
 
 			networking.sendP2PPacket(remoteUser.getValue(), packetSendBuffer,
-					SteamNetworking.P2PSend.Reliable, defaultChannel);
+                                     SteamNetworking.P2PSend.Reliable, defaultChannel);
 		}
 	}
 
-	private int checkMagicBytes(ByteBuffer buffer, byte[] magicBytes) {
+	private static int checkMagicBytes(final ByteBuffer buffer, final byte[] magicBytes) {
 		for (int b = 0; b < magicBytes.length; b++) {
 			if (buffer.get(b) != magicBytes[b]) {
 				return 0;
@@ -299,7 +309,7 @@ public class SteamNetworkingTest extends SteamTestApp {
 		return magicBytes.length;
 	}
 
-	public static void main(String[] arguments) {
+	public static void main(final String[] arguments) {
 		new SteamNetworkingTest().clientMain(arguments);
 	}
 

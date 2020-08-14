@@ -1,6 +1,11 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.friends.SteamFriends;
+import com.codedisaster.steamworks.friends.SteamFriendsCallback;
+import com.codedisaster.steamworks.inventory.*;
+import com.codedisaster.steamworks.user.SteamUser;
+import com.codedisaster.steamworks.user.SteamUserCallback;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -14,90 +19,80 @@ public class SteamInventoryTest extends SteamTestApp {
     private SteamFriends friends;
     private SteamInventory inventory;
 
-    private SteamUserCallback userCallback = new SteamUserCallback() {
+    private final SteamUserCallback userCallback = new SteamUserCallback() {
         @Override
-        public void onAuthSessionTicket(SteamAuthTicket authTicket, SteamResult result) {
+        public void onAuthSessionTicket(final SteamAuthTicket authTicket, final SteamResult result) {
 
         }
 
         @Override
-        public void onValidateAuthTicket(SteamID steamID, SteamAuth.AuthSessionResponse authSessionResponse, SteamID ownerSteamID) {
+        public void onValidateAuthTicket(final SteamID steamID, final SteamAuth.AuthSessionResponse authSessionResponse, final SteamID ownerSteamID) {
 
         }
 
         @Override
-        public void onMicroTxnAuthorization(int appID, long orderID, boolean authorized) {
+        public void onMicroTxnAuthorization(final int appID, final long orderID, final boolean authorized) {
 
         }
 
         @Override
-        public void onEncryptedAppTicket(SteamResult result) {
-
-        }
-    };
-
-    private SteamFriendsCallback friendsCallback = new SteamFriendsCallback() {
-        @Override
-        public void onSetPersonaNameResponse(boolean success, boolean localSuccess, SteamResult result) {
-
-        }
-
-        @Override
-        public void onPersonaStateChange(SteamID steamID, SteamFriends.PersonaChange change) {
-
-            switch (change) {
-
-                case Name:
-                    // System.out.println("Persona name received: " + "accountID=" + steamID.getAccountID() + ", name='" + friends.getFriendPersonaName(steamID) + "'");
-                    break;
-
-                default:
-                    // System.out.println("Persona state changed (unhandled): " + "accountID=" + steamID.getAccountID() + ", change=" + change.name());
-                    break;
-            }
-        }
-
-        @Override
-        public void onGameOverlayActivated(boolean active) {
-
-        }
-
-        @Override
-        public void onGameLobbyJoinRequested(SteamID steamIDLobby, SteamID steamIDFriend) {
-
-        }
-
-        @Override
-        public void onAvatarImageLoaded(SteamID steamID, int image, int width, int height) {
-
-        }
-
-        @Override
-        public void onFriendRichPresenceUpdate(SteamID steamIDFriend, int appID) {
-
-        }
-
-        @Override
-        public void onGameRichPresenceJoinRequested(SteamID steamIDFriend, String connect) {
-
-        }
-
-        @Override
-        public void onGameServerChangeRequested(String server, String password) {
+        public void onEncryptedAppTicket(final SteamResult result) {
 
         }
     };
 
-    private SteamInventoryCallback inventoryCallback = new SteamInventoryCallback() {
+    private final SteamFriendsCallback friendsCallback = new SteamFriendsCallback() {
         @Override
-        public void onSteamInventoryResultReady(SteamInventoryHandle inventoryHandle, SteamResult result) {
+        public void onSetPersonaNameResponse(final boolean success, final boolean localSuccess, final SteamResult result) {
+
+        }
+
+        @Override
+        public void onPersonaStateChange(final SteamID steamID, final SteamFriends.PersonaChange change) {
+
+        }
+
+        @Override
+        public void onGameOverlayActivated(final boolean active) {
+
+        }
+
+        @Override
+        public void onGameLobbyJoinRequested(final SteamID steamIDLobby, final SteamID steamIDFriend) {
+
+        }
+
+        @Override
+        public void onAvatarImageLoaded(final SteamID steamID, final int image, final int width, final int height) {
+
+        }
+
+        @Override
+        public void onFriendRichPresenceUpdate(final SteamID steamIDFriend, final int appID) {
+
+        }
+
+        @Override
+        public void onGameRichPresenceJoinRequested(final SteamID steamIDFriend, final String connect) {
+
+        }
+
+        @Override
+        public void onGameServerChangeRequested(final String server, final String password) {
+
+        }
+    };
+
+    private final SteamInventoryCallback inventoryCallback = new SteamInventoryCallback() {
+        @Override
+        public void onSteamInventoryResultReady(final SteamInventoryHandle inventoryHandle, final SteamResult result) {
             System.out.println("Inventory Result ready: " + result + ", " + SteamNativeIntHandle
                     .getNativeHandle(inventoryHandle));
             System.out.println(inventory.getResultStatus(inventoryHandle) + ": result of getResultStatus");
         }
 
         @Override
-        public void onSteamInventoryFullUpdate(SteamInventoryHandle inventoryHandle) {
+        public void onSteamInventoryFullUpdate(final SteamInventoryHandle inventoryHandle) {
             System.out.println("Inventory full update");
             final List<SteamInventory.SteamItemDetails> itemDetails = new ArrayList<>();
             System.out.println(inventory.getResultStatus(inventoryHandle) + ": result of getResultStatus");
@@ -108,23 +103,23 @@ public class SteamInventoryTest extends SteamTestApp {
                     Arrays.asList(inventory.getResultItemPropertyKeys(inventoryHandle, 0).split(",")));
             final List<String> values = new ArrayList<>();
             System.out.println(inventory.getResultItemProperty(inventoryHandle, 0, properties.get(0), values) + ": result of getResultItemProperty for " + properties.get(0) + ": " + values.get(0));
-            Optional<SteamInventory.SteamItemDetails> propertyTestItem = itemDetails.stream().filter(itemDetail -> itemDetail.getItemDefinition() == 1300).findFirst();
+            final Optional<SteamInventory.SteamItemDetails> propertyTestItem = itemDetails.stream().filter(itemDetail -> itemDetail.getItemDefinition() == 1300).findFirst();
             if(propertyTestItem.isPresent()) {
                 values.clear();
                 System.out.println(inventory.getResultItemProperty(inventoryHandle, itemDetails.indexOf(propertyTestItem.get()), "dynamic_props", values) + ": result of getResultItemProperty for dynamic_props: " + values.get(0));
             }
             System.out.println(inventory.getResultTimestamp(inventoryHandle) + ": result of getResultTimestamp");
             System.out.println(inventory.checkResultSteamID(inventoryHandle, user.getSteamID()) + ": result of checkResultSteamID");
-            int friendsSize = friends.getFriendCount(SteamFriends.FriendFlags.Immediate);
+            final int friendsSize = friends.getFriendCount(SteamFriends.FriendFlags.Immediate);
             System.out.println(inventory.checkResultSteamID(inventoryHandle, friends.getFriendByIndex(friendsSize-1, SteamFriends.FriendFlags.Immediate)) + ": result of checkResultSteamID");
-            int bufferSize = inventory.getSizeNeededForResultSerialization(inventoryHandle);
+            final int bufferSize = inventory.getSizeNeededForResultSerialization(inventoryHandle);
             System.out.println(bufferSize + ": result of getSizeNeededForResultSerialization");
             final ByteBuffer serializedResult = ByteBuffer.allocateDirect(bufferSize);
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             try {
                 System.out.println(inventory.serializeResult(inventoryHandle, serializedResult) + ": result of serializeResult, serializedHandle: " + serializedResult + ", Handle: " + inventoryHandle);
                 System.out.println(inventory.deserializeResult(inventories, serializedResult) + ": result of deserializeResult, deserializedHandle: " + inventories.get(0));
-            } catch(SteamException e) {
+            } catch(final SteamException e) {
                 e.printStackTrace();
             }
             inventory.destroyResult(inventories.get(0));
@@ -139,20 +134,20 @@ public class SteamInventoryTest extends SteamTestApp {
         }
 
         @Override
-        public void onSteamInventoryEligiblePromoItemDefIDs(SteamResult result, SteamID steamID,
-                                                            int eligiblePromoItemDefs, boolean cachedData) {
+        public void onSteamInventoryEligiblePromoItemDefIDs(final SteamResult result, final SteamID steamID,
+                                                            final int eligiblePromoItemDefs, final boolean cachedData) {
             System.out.println(result + " Inventory Eligible Promo Items for user: " + steamID.getAccountID() + ", Count: " + eligiblePromoItemDefs + ", cached: " + cachedData);
             final List<Integer> eligiblePromoItemDefIDs = new ArrayList<>();
             System.out.println(inventory.getEligiblePromoItemDefinitionIDs(user.getSteamID(), eligiblePromoItemDefIDs, eligiblePromoItemDefs) + ": result of getEligiblePromoItemDefinitionIDs, itemIds: " + eligiblePromoItemDefs);
         }
 
         @Override
-        public void onSteamInventoryStartPurchaseResult(SteamResult result, long orderID, long transactionID) {
+        public void onSteamInventoryStartPurchaseResult(final SteamResult result, final long orderID, final long transactionID) {
             System.out.println(result + " Inventory Start Purchase, OrderID: " + orderID + ", transactionID: " + transactionID);
         }
 
         @Override
-        public void onSteamInventoryRequestPricesResult(SteamResult result, String currency) {
+        public void onSteamInventoryRequestPricesResult(final SteamResult result, final String currency) {
             System.out.println(result + " Inventory Request Prices: " + currency);
         }
     };
@@ -182,7 +177,7 @@ public class SteamInventoryTest extends SteamTestApp {
     }
 
     @Override
-    protected void processInput(String input) throws SteamException {
+    protected void processInput(final String input) throws SteamException {
         if (input.startsWith("inventory getAllItems")) {
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             System.out.println(inventory.getAllItems(inventories) + ": result of getAllItems, Handle: " + SteamNativeIntHandle.getNativeHandle(inventories.get(0)));
@@ -191,12 +186,12 @@ public class SteamInventoryTest extends SteamTestApp {
         } else if (input.startsWith("inventory requestEligiblePromoItemDefinitionsIDs")) {
             System.out.println(inventory.requestEligiblePromoItemDefinitionsIDs(user.getSteamID()).isValid() + ": result of requestEligiblePromoItemDefinitionsIDs");
         } else if (input.startsWith("inventory addPromoItem ")) {
-            String[] params = input.substring("inventory addPromoItem ".length()).split(" ");
+            final String[] params = input.substring("inventory addPromoItem ".length()).split(" ");
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             System.out.println(inventory.addPromoItem(inventories, Integer.parseInt(params[0])) + ": result of addPromoItem, Handle: " + inventories.get(0));
         } else if (input.startsWith("inventory addPromoItems ")) {
-            String[] params = input.substring("inventory addPromoItems ".length()).split(" ");
-            int[] ids = Arrays.stream(params).mapToInt(Integer::parseInt).toArray();
+            final String[] params = input.substring("inventory addPromoItems ".length()).split(" ");
+            final int[] ids = Arrays.stream(params).mapToInt(Integer::parseInt).toArray();
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             System.out.println(inventory.addPromoItems(inventories, ids) + ": result of addPromoItems, Handle: " + inventories.get(0));
         } else if (input.startsWith("inventory generateItems")) {
@@ -216,7 +211,7 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(inventory.getAllItems(inventories));
             try {
                 Thread.sleep(1000);
-            } catch(InterruptedException e) {
+            } catch(final InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(inventory.getResultItems(inventories.get(0), itemDetails));
@@ -234,7 +229,7 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(inventory.getAllItems(inventories));
             try {
                 Thread.sleep(1000);
-            } catch(InterruptedException e) {
+            } catch(final InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(inventory.getResultItems(inventories.get(0), itemDetails));
@@ -246,7 +241,7 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(inventory.getAllItems(inventories));
             try {
                 Thread.sleep(1000);
-            } catch(InterruptedException e) {
+            } catch(final InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(inventory.getResultItems(inventories.get(0), itemDetails));
@@ -268,10 +263,10 @@ public class SteamInventoryTest extends SteamTestApp {
         } else if (input.startsWith("inventory getNumItemsWithPrices")) {
             System.out.println(inventory.getNumItemsWithPrices() + ": result of getNumItemsWithPrices");
         } else if (input.startsWith("inventory getItemsWithPrices")) {
-            int size = inventory.getNumItemsWithPrices();
-            int[] itemDefs = new int[size];
-            long[] itemCurrentPrices = new long[size];
-            long[] itemBasePrices = new long[size];
+            final int size = inventory.getNumItemsWithPrices();
+            final int[] itemDefs = new int[size];
+            final long[] itemCurrentPrices = new long[size];
+            final long[] itemBasePrices = new long[size];
             Arrays.fill(itemDefs, -1);
             Arrays.fill(itemCurrentPrices, -1);
             Arrays.fill(itemBasePrices, -1);
@@ -280,21 +275,21 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(Arrays.toString(itemCurrentPrices) + ": itemCurrentPrices");
             System.out.println(Arrays.toString(itemBasePrices) + ": itemBasePrices");
         } else if (input.startsWith("inventory getItemPrice")) {
-            long[] itemCurrentPrices = new long[1];
-            long[] itemBasePrices = new long[1];
+            final long[] itemCurrentPrices = new long[1];
+            final long[] itemBasePrices = new long[1];
             Arrays.fill(itemCurrentPrices, -1);
             Arrays.fill(itemBasePrices, -1);
             System.out.println(inventory.getItemPrice(1100, itemCurrentPrices, itemBasePrices) + ": result of getItemPrice");
             System.out.println(itemCurrentPrices[0] + ": itemCurrentPrices");
             System.out.println(itemBasePrices[0] + ": itemBasePrices");
         } else if (input.startsWith("inventory UpdateProperties ")) {
-            String[] params = input.substring("inventory UpdateProperties ".length()).split(" ");
+            final String[] params = input.substring("inventory UpdateProperties ".length()).split(" ");
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             final List<SteamInventory.SteamItemDetails> itemDetails = new ArrayList<>();
             System.out.println(inventory.getAllItems(inventories));
             try {
                 Thread.sleep(1000);
-            } catch(InterruptedException e) {
+            } catch(final InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(inventory.getResultItems(inventories.get(0), itemDetails));
@@ -304,13 +299,13 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(inventory.setProperty(updateHandle, items.get(0), params[0], 10L) + ": result of setProperty for property: " + params[0]);
             System.out.println(inventory.submitUpdateProperties(updateHandle, inventories) + ": result of submitUpdateProperties");
         } else if (input.startsWith("inventory removeProperty ")) {
-            String[] params = input.substring("inventory removeProperty ".length()).split(" ");
+            final String[] params = input.substring("inventory removeProperty ".length()).split(" ");
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
             final List<SteamInventory.SteamItemDetails> itemDetails = new ArrayList<>();
             System.out.println(inventory.getAllItems(inventories));
             try {
                 Thread.sleep(1000);
-            } catch(InterruptedException e) {
+            } catch(final InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(inventory.getResultItems(inventories.get(0), itemDetails));
@@ -321,7 +316,7 @@ public class SteamInventoryTest extends SteamTestApp {
             System.out.println(inventory.submitUpdateProperties(updateHandle, inventories) + ": result of submitUpdateProperties");
         } else if (input.startsWith("inventory inspectItem ")) {
             final List<SteamInventoryHandle> inventories = new ArrayList<>();
-            String[] params = input.substring("inventory inspectItem ".length()).split(" ");
+            final String[] params = input.substring("inventory inspectItem ".length()).split(" ");
             System.out.println(inventory.inspectItem(inventories, params[0]));
         } else if (input.startsWith("inventory getItemsByID")) {
             final List<SteamItemInstanceId> itemIds = new ArrayList<>();
@@ -331,7 +326,7 @@ public class SteamInventoryTest extends SteamTestApp {
         }
     }
 
-    public static void main(String[] arguments) {
+    public static void main(final String[] arguments) {
         new SteamInventoryTest().clientMain(arguments);
     }
 }

@@ -10,10 +10,10 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 		loadLibraries(null);
 	}
 
-	public static void loadLibraries(String libraryPath) throws SteamException {
+	public static void loadLibraries(final String libraryPath) throws SteamException {
 
 		if (libraryPath == null && SteamSharedLibraryLoader.DEBUG) {
-			String sdkPath = SteamSharedLibraryLoader.getSdkLibraryPath();
+			final String sdkPath = SteamSharedLibraryLoader.getSdkLibraryPath();
 			SteamSharedLibraryLoader.loadLibrary("sdkencryptedappticket", sdkPath);
 		} else {
 			SteamSharedLibraryLoader.loadLibrary("sdkencryptedappticket", libraryPath);
@@ -26,8 +26,8 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 		super(~0L);
 	}
 
-	public boolean decryptTicket(ByteBuffer ticketEncrypted, ByteBuffer ticketDecrypted,
-								 byte[] key, int[] ticketDecryptedOutputSize) throws SteamException {
+	public static boolean decryptTicket(final ByteBuffer ticketEncrypted, final ByteBuffer ticketDecrypted,
+										final byte[] key, final int[] ticketDecryptedOutputSize) throws SteamException {
 
 		checkBuffer(ticketEncrypted);
 		checkBuffer(ticketDecrypted);
@@ -39,7 +39,7 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				key, SymmetricKeyLen, ticketDecryptedOutputSize);
 	}
 
-	public boolean isTicketForApp(ByteBuffer ticketDecrypted, int appID) throws SteamException {
+	public static boolean isTicketForApp(final ByteBuffer ticketDecrypted, final int appID) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
@@ -47,7 +47,7 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining(), appID);
 	}
 
-	public int getTicketIssueTime(ByteBuffer ticketDecrypted) throws SteamException {
+	public static int getTicketIssueTime(final ByteBuffer ticketDecrypted) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
@@ -55,15 +55,15 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining());
 	}
 
-	public SteamID getTicketSteamID(ByteBuffer ticketDecrypted) throws SteamException {
+	public static SteamID getTicketSteamID(final ByteBuffer ticketDecrypted) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
-		return new SteamID(SteamEncryptedAppTicketNative.getTicketSteamID(
+		return SteamID.createFromNativeHandle(SteamEncryptedAppTicketNative.getTicketSteamID(
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining()));
 	}
 
-	public int getTicketAppID(ByteBuffer ticketDecrypted) throws SteamException {
+	public static int getTicketAppID(final ByteBuffer ticketDecrypted) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
@@ -71,7 +71,7 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining());
 	}
 
-	public boolean userOwnsAppInTicket(ByteBuffer ticketDecrypted, int appID) throws SteamException {
+	public static boolean userOwnsAppInTicket(final ByteBuffer ticketDecrypted, final int appID) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
@@ -79,7 +79,7 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining(), appID);
 	}
 
-	public boolean userIsVacBanned(ByteBuffer ticketDecrypted) throws SteamException {
+	public static boolean userIsVacBanned(final ByteBuffer ticketDecrypted) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 
@@ -87,7 +87,7 @@ public class SteamEncryptedAppTicket extends SteamInterface {
 				ticketDecrypted, ticketDecrypted.position(), ticketDecrypted.remaining());
 	}
 
-	public int getUserVariableData(ByteBuffer ticketDecrypted, ByteBuffer userData) throws SteamException {
+	public static int getUserVariableData(final ByteBuffer ticketDecrypted, final ByteBuffer userData) throws SteamException {
 
 		checkBuffer(ticketDecrypted);
 		checkBuffer(userData);

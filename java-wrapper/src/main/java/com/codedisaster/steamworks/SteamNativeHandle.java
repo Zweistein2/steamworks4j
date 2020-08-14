@@ -2,9 +2,9 @@ package com.codedisaster.steamworks;
 
 public abstract class SteamNativeHandle {
 
-	long handle;
+	public long handle;
 
-	SteamNativeHandle(long handle) {
+	protected SteamNativeHandle(final long handle) {
 		this.handle = handle;
 	}
 
@@ -14,7 +14,7 @@ public abstract class SteamNativeHandle {
 	 * In most cases this value should not be stored and used by the user application. See
 	 * {@link SteamID#createFromNativeHandle(long)} for a possible use case.
 	 */
-	public static <T extends SteamNativeHandle> long getNativeHandle(T handle) {
+	public static <T extends SteamNativeHandle> long getNativeHandle(final T handle) {
 		return handle.handle;
 	}
 
@@ -24,7 +24,7 @@ public abstract class SteamNativeHandle {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		if (other instanceof SteamNativeHandle) {
 			return handle == ((SteamNativeHandle) other).handle;
 		}

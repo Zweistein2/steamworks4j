@@ -1,6 +1,18 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.apps.SteamApps;
+import com.codedisaster.steamworks.friends.SteamFriends;
+import com.codedisaster.steamworks.friends.SteamFriendsCallback;
+import com.codedisaster.steamworks.remotestorage.SteamPublishedFileUpdateHandle;
+import com.codedisaster.steamworks.remotestorage.SteamRemoteStorage;
+import com.codedisaster.steamworks.remotestorage.SteamRemoteStorageCallback;
+import com.codedisaster.steamworks.ugc.*;
+import com.codedisaster.steamworks.user.SteamUser;
+import com.codedisaster.steamworks.user.SteamUserCallback;
+import com.codedisaster.steamworks.userstats.*;
+import com.codedisaster.steamworks.utils.SteamUtils;
+import com.codedisaster.steamworks.utils.SteamUtilsCallback;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -18,64 +30,64 @@ public class SteamClientAPITest extends SteamTestApp {
 
 	private SteamLeaderboardHandle currentLeaderboard = null;
 
-	private SteamUserCallback userCallback = new SteamUserCallback() {
+	private final SteamUserCallback userCallback = new SteamUserCallback() {
 		@Override
-		public void onAuthSessionTicket(SteamAuthTicket authTicket, SteamResult result) {
+		public void onAuthSessionTicket(final SteamAuthTicket authTicket, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onValidateAuthTicket(SteamID steamID, SteamAuth.AuthSessionResponse authSessionResponse, SteamID ownerSteamID) {
+		public void onValidateAuthTicket(final SteamID steamID, final SteamAuth.AuthSessionResponse authSessionResponse, final SteamID ownerSteamID) {
 
 		}
 
 		@Override
-		public void onMicroTxnAuthorization(int appID, long orderID, boolean authorized) {
+		public void onMicroTxnAuthorization(final int appID, final long orderID, final boolean authorized) {
 
 		}
 
 		@Override
-		public void onEncryptedAppTicket(SteamResult result) {
+		public void onEncryptedAppTicket(final SteamResult result) {
 
 		}
 	};
 
-	private SteamUserStatsCallback userStatsCallback = new SteamUserStatsCallback() {
+	private final SteamUserStatsCallback userStatsCallback = new SteamUserStatsCallback() {
 		@Override
-		public void onUserStatsReceived(long gameId, SteamID steamIDUser, SteamResult result) {
+		public void onUserStatsReceived(final long gameId, final SteamID steamIDUser, final SteamResult result) {
 			System.out.println("User stats received: gameId=" + gameId + ", userId=" + steamIDUser.getAccountID() +
 					", result=" + result.toString());
 
-			int numAchievements = userStats.getNumAchievements();
+			final int numAchievements = userStats.getNumAchievements();
 			System.out.println("Num of achievements: " + numAchievements);
 
 			for (int i = 0; i < numAchievements; i++) {
-				String name = userStats.getAchievementName(i);
-				boolean achieved = userStats.isAchieved(name, false);
+				final String name = userStats.getAchievementName(i);
+				final boolean achieved = userStats.isAchieved(name, false);
 				System.out.println("# " + i + " : name=" + name + ", achieved=" + (achieved ? "yes" : "no"));
 			}
 		}
 
 		@Override
-		public void onUserStatsStored(long gameId, SteamResult result) {
+		public void onUserStatsStored(final long gameId, final SteamResult result) {
 			System.out.println("User stats stored: gameId=" + gameId +
 					", result=" + result.toString());
 		}
 
 		@Override
-		public void onUserStatsUnloaded(SteamID steamIDUser) {
+		public void onUserStatsUnloaded(final SteamID steamIDUser) {
 			System.out.println("User stats unloaded: userId=" + steamIDUser.getAccountID());
 		}
 
 		@Override
-		public void onUserAchievementStored(long gameId, boolean isGroupAchievement, String achievementName,
-											int curProgress, int maxProgress) {
+		public void onUserAchievementStored(final long gameId, final boolean isGroupAchievement, final String achievementName,
+											final int curProgress, final int maxProgress) {
 			System.out.println("User achievement stored: gameId=" + gameId + ", name=" + achievementName +
 					", progress=" + curProgress + "/" + maxProgress);
 		}
 
 		@Override
-		public void onLeaderboardFindResult(SteamLeaderboardHandle leaderboard, boolean found) {
+		public void onLeaderboardFindResult(final SteamLeaderboardHandle leaderboard, final boolean found) {
 			System.out.println("Leaderboard find result: handle=" + leaderboard.toString() +
 					", found=" + (found ? "yes" : "no"));
 
@@ -88,21 +100,21 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onLeaderboardScoresDownloaded(SteamLeaderboardHandle leaderboard,
-												  SteamLeaderboardEntriesHandle entries,
-												  int numEntries) {
+		public void onLeaderboardScoresDownloaded(final SteamLeaderboardHandle leaderboard,
+												  final SteamLeaderboardEntriesHandle entries,
+												  final int numEntries) {
 
 			System.out.println("Leaderboard scores downloaded: handle=" + leaderboard.toString() +
 					", entries=" + entries.toString() + ", count=" + numEntries);
 
-			int[] details = new int[16];
+			final int[] details = new int[16];
 
 			for (int i = 0; i < numEntries; i++) {
 
-				SteamLeaderboardEntry entry = new SteamLeaderboardEntry();
+				final SteamLeaderboardEntry entry = new SteamLeaderboardEntry();
 				if (userStats.getDownloadedLeaderboardEntry(entries, i, entry, details)) {
 
-					int numDetails = entry.getNumDetails();
+					final int numDetails = entry.getNumDetails();
 
 					System.out.println("Leaderboard entry #" + i +
 							": accountID=" + entry.getSteamIDUser().getAccountID() +
@@ -120,13 +132,13 @@ public class SteamClientAPITest extends SteamTestApp {
 						System.out.println("  ... user name is '" +
 								friends.getFriendPersonaName(entry.getSteamIDUser()) + "'");
 
-						int smallAvatar = friends.getSmallFriendAvatar(entry.getSteamIDUser());
+						final int smallAvatar = friends.getSmallFriendAvatar(entry.getSteamIDUser());
 						if (smallAvatar != 0) {
-							int w = utils.getImageWidth(smallAvatar);
-							int h = utils.getImageHeight(smallAvatar);
+							final int w = utils.getImageWidth(smallAvatar);
+							final int h = utils.getImageHeight(smallAvatar);
 							System.out.println("  ... small avatar size: " + w + "x" + h + " pixels");
 
-							ByteBuffer image = ByteBuffer.allocateDirect(w * h * 4);
+							final ByteBuffer image = ByteBuffer.allocateDirect(w * h * 4);
 
 							try {
 								if (utils.getImageRGBA(smallAvatar, image)) {
@@ -150,7 +162,7 @@ public class SteamClientAPITest extends SteamTestApp {
 								} else {
 									System.out.println("  ... small avatar retrieve avatar image failed!");
 								}
-							} catch (SteamException e) {
+							} catch (final SteamException e) {
 								e.printStackTrace();
 							}
 						} else {
@@ -164,12 +176,12 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onLeaderboardScoreUploaded(boolean success,
-											   SteamLeaderboardHandle leaderboard,
-											   int score,
-											   boolean scoreChanged,
-											   int globalRankNew,
-											   int globalRankPrevious) {
+		public void onLeaderboardScoreUploaded(final boolean success,
+											   final SteamLeaderboardHandle leaderboard,
+											   final int score,
+											   final boolean scoreChanged,
+											   final int globalRankNew,
+											   final int globalRankPrevious) {
 
 			System.out.println("Leaderboard score uploaded: " + (success ? "yes" : "no") +
 					", handle=" + leaderboard.toString() +
@@ -180,34 +192,34 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onGlobalStatsReceived(long gameId, SteamResult result) {
+		public void onGlobalStatsReceived(final long gameId, final SteamResult result) {
 			System.out.println("Global stats received: gameId=" + gameId + ", result=" + result.toString());
 		}
 	};
 
-	private SteamRemoteStorageCallback remoteStorageCallback = new SteamRemoteStorageCallback() {
+	private final SteamRemoteStorageCallback remoteStorageCallback = new SteamRemoteStorageCallback() {
 		@Override
-		public void onFileWriteAsyncComplete(SteamResult result) {
+		public void onFileWriteAsyncComplete(final SteamResult result) {
 
 		}
 
 		@Override
-		public void onFileReadAsyncComplete(SteamAPICall fileReadAsync, SteamResult result, int offset, int read) {
+		public void onFileReadAsyncComplete(final SteamAPICall fileReadAsync, final SteamResult result, final int offset, final int read) {
 
 		}
 
 		@Override
-		public void onFileShareResult(SteamUGCHandle fileHandle, String fileName, SteamResult result) {
+		public void onFileShareResult(final SteamUGCHandle fileHandle, final String fileName, final SteamResult result) {
 			System.out.println("Remote storage file share result: handle='" + fileHandle.toString() +
 					", name=" + fileName + "', result=" + result.toString());
 		}
 
 		@Override
-		public void onDownloadUGCResult(SteamUGCHandle fileHandle, SteamResult result) {
+		public void onDownloadUGCResult(final SteamUGCHandle fileHandle, final SteamResult result) {
 			System.out.println("Remote storage download UGC result: handle='" + fileHandle.toString() +
 					"', result=" + result.toString());
 
-			ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+			final ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 			int offset = 0, bytesRead;
 
 			do {
@@ -220,42 +232,42 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onPublishFileResult(SteamPublishedFileID publishedFileID, boolean needsToAcceptWLA, SteamResult result) {
+		public void onPublishFileResult(final SteamPublishedFileID publishedFileID, final boolean needsToAcceptWLA, final SteamResult result) {
 			System.out.println("Remote storage publish file result: publishedFileID=" + publishedFileID.toString() +
 					", needsToAcceptWLA=" + needsToAcceptWLA + ", result=" + result.toString());
 		}
 
 		@Override
-		public void onUpdatePublishedFileResult(SteamPublishedFileID publishedFileID, boolean needsToAcceptWLA, SteamResult result) {
+		public void onUpdatePublishedFileResult(final SteamPublishedFileID publishedFileID, final boolean needsToAcceptWLA, final SteamResult result) {
 			System.out.println("Remote storage update published file result: publishedFileID=" + publishedFileID.toString() +
 					", needsToAcceptWLA=" + needsToAcceptWLA + ", result=" + result.toString());
 		}
 
 		@Override
-		public void onPublishedFileSubscribed(SteamPublishedFileID publishedFileID, int appID) {
+		public void onPublishedFileSubscribed(final SteamPublishedFileID publishedFileID, final int appID) {
 
 		}
 
 		@Override
-		public void onPublishedFileUnsubscribed(SteamPublishedFileID publishedFileID, int appID) {
+		public void onPublishedFileUnsubscribed(final SteamPublishedFileID publishedFileID, final int appID) {
 
 		}
 
 		@Override
-		public void onPublishedFileDeleted(SteamPublishedFileID publishedFileID, int appID) {
+		public void onPublishedFileDeleted(final SteamPublishedFileID publishedFileID, final int appID) {
 
 		}
 	};
 
-	private SteamUGCCallback ugcCallback = new SteamUGCCallback() {
+	private final SteamUGCCallback ugcCallback = new SteamUGCCallback() {
 		@Override
-		public void onUGCQueryCompleted(SteamUGCQuery query, int numResultsReturned, int totalMatchingResults,
-										boolean isCachedData, SteamResult result) {
+		public void onUGCQueryCompleted(final SteamUGCQuery query, final int numResultsReturned, final int totalMatchingResults,
+										final boolean isCachedData, final SteamResult result) {
 			System.out.println("UGC query completed: handle=" + query.toString() + ", " + numResultsReturned + " of " +
 					totalMatchingResults + " results returned, result=" + result.toString());
 
 			for (int i = 0; i < numResultsReturned; i++) {
-				SteamUGCDetails details = new SteamUGCDetails();
+				final SteamUGCDetails details = new SteamUGCDetails();
 				ugc.getQueryUGCResult(query, i, details);
 				printUGCDetails("UGC details #" + i, details);
 			}
@@ -264,27 +276,27 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onSubscribeItem(SteamPublishedFileID publishedFileID, SteamResult result) {
+		public void onSubscribeItem(final SteamPublishedFileID publishedFileID, final SteamResult result) {
 			System.out.println("Subscribe item result: publishedFileID=" + publishedFileID + ", result=" + result);
 		}
 
 		@Override
-		public void onUnsubscribeItem(SteamPublishedFileID publishedFileID, SteamResult result) {
+		public void onUnsubscribeItem(final SteamPublishedFileID publishedFileID, final SteamResult result) {
 			System.out.println("Unsubscribe item result: publishedFileID=" + publishedFileID + ", result=" + result);
 		}
 
 		@Override
-		public void onRequestUGCDetails(SteamUGCDetails details, SteamResult result) {
+		public void onRequestUGCDetails(final SteamUGCDetails details, final SteamResult result) {
 			System.out.println("Request details result: result=" + result);
 			printUGCDetails("UGC details ", details);
 		}
 
 		@Override
-		public void onCreateItem(SteamPublishedFileID publishedFileID, boolean needsToAcceptWLA, SteamResult result) {
+		public void onCreateItem(final SteamPublishedFileID publishedFileID, final boolean needsToAcceptWLA, final SteamResult result) {
 			System.out.println("Create item result: result=" + result + ", needsToAcceptWLA: " + needsToAcceptWLA);
 			System.out.println("publishedFileID: " + publishedFileID);
 
-			SteamUGCUpdateHandle updateHandle = ugc.startItemUpdate(utils.getAppID(), publishedFileID);
+			final SteamUGCUpdateHandle updateHandle = ugc.startItemUpdate(utils.getAppID(), publishedFileID);
 			ugc.setItemTitle(updateHandle, "Test UGC!");
 			ugc.setItemDescription(updateHandle, "Dummy UGC file published by test application.");
 			ugc.setItemVisibility(updateHandle, SteamRemoteStorage.PublishedFileVisibility.Private);
@@ -292,32 +304,32 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onSubmitItemUpdate(SteamPublishedFileID publishedFileID, boolean needsToAcceptWLA, SteamResult result) {
+		public void onSubmitItemUpdate(final SteamPublishedFileID publishedFileID, final boolean needsToAcceptWLA, final SteamResult result) {
 			System.out.println("Submit itemupdate result: result=" + result + ", needsToAcceptWLA: " + needsToAcceptWLA);
 			System.out.println("publishedFileID: " + publishedFileID);
 		}
 
 		@Override
-		public void onDownloadItemResult(int appID, SteamPublishedFileID publishedFileID, SteamResult result) {
+		public void onDownloadItemResult(final int appID, final SteamPublishedFileID publishedFileID, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onUserFavoriteItemsListChanged(SteamPublishedFileID publishedFileID, boolean wasAddRequest, SteamResult result) {
+		public void onUserFavoriteItemsListChanged(final SteamPublishedFileID publishedFileID, final boolean wasAddRequest, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onSetUserItemVote(SteamPublishedFileID publishedFileID, boolean voteUp, SteamResult result) {
+		public void onSetUserItemVote(final SteamPublishedFileID publishedFileID, final boolean voteUp, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onGetUserItemVote(SteamPublishedFileID publishedFileID, boolean votedUp, boolean votedDown, boolean voteSkipped, SteamResult result) {
+		public void onGetUserItemVote(final SteamPublishedFileID publishedFileID, final boolean votedUp, final boolean votedDown, final boolean voteSkipped, final SteamResult result) {
 
 		}
 
-		private void printUGCDetails(String prefix, SteamUGCDetails details) {
+		private void printUGCDetails(final String prefix, final SteamUGCDetails details) {
 			System.out.println(prefix +
 					": publishedFileID=" + details.getPublishedFileID().toString() +
 					", result=" + details.getResult().name() +
@@ -332,41 +344,38 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onStartPlaytimeTracking(SteamResult result) {
+		public void onStartPlaytimeTracking(final SteamResult result) {
 
 		}
 
 		@Override
-		public void onStopPlaytimeTracking(SteamResult result) {
+		public void onStopPlaytimeTracking(final SteamResult result) {
 
 		}
 
 		@Override
-		public void onStopPlaytimeTrackingForAllItems(SteamResult result) {
+		public void onStopPlaytimeTrackingForAllItems(final SteamResult result) {
 
 		}
 
 		@Override
-		public void onDeleteItem(SteamPublishedFileID publishedFileID, SteamResult result) {
+		public void onDeleteItem(final SteamPublishedFileID publishedFileID, final SteamResult result) {
 
 		}
 	};
 
-	private SteamFriendsCallback friendsCallback = new SteamFriendsCallback() {
+	private final SteamFriendsCallback friendsCallback = new SteamFriendsCallback() {
 		@Override
-		public void onSetPersonaNameResponse(boolean success, boolean localSuccess, SteamResult result) {
+		public void onSetPersonaNameResponse(final boolean success, final boolean localSuccess, final SteamResult result) {
 
 		}
 
 		@Override
-		public void onPersonaStateChange(SteamID steamID, SteamFriends.PersonaChange change) {
-
+		public void onPersonaStateChange(final SteamID steamID, final SteamFriends.PersonaChange change) {
 			switch (change) {
-
 				case Name:
 					System.out.println("Persona name received: " + "accountID=" + steamID.getAccountID() + ", name='" + friends.getFriendPersonaName(steamID) + "'");
 					break;
-
 				default:
 					System.out.println("Persona state changed (unhandled): " + "accountID=" + steamID.getAccountID() + ", change=" + change.name());
 					break;
@@ -374,42 +383,37 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 
 		@Override
-		public void onGameOverlayActivated(boolean active) {
+		public void onGameOverlayActivated(final boolean active) {
 
 		}
 
 		@Override
-		public void onGameLobbyJoinRequested(SteamID steamIDLobby, SteamID steamIDFriend) {
+		public void onGameLobbyJoinRequested(final SteamID steamIDLobby, final SteamID steamIDFriend) {
 
 		}
 
 		@Override
-		public void onAvatarImageLoaded(SteamID steamID, int image, int width, int height) {
+		public void onAvatarImageLoaded(final SteamID steamID, final int image, final int width, final int height) {
 
 		}
 
 		@Override
-		public void onFriendRichPresenceUpdate(SteamID steamIDFriend, int appID) {
+		public void onFriendRichPresenceUpdate(final SteamID steamIDFriend, final int appID) {
 
 		}
 
 		@Override
-		public void onGameRichPresenceJoinRequested(SteamID steamIDFriend, String connect) {
+		public void onGameRichPresenceJoinRequested(final SteamID steamIDFriend, final String connect) {
 
 		}
 
 		@Override
-		public void onGameServerChangeRequested(String server, String password) {
+		public void onGameServerChangeRequested(final String server, final String password) {
 
 		}
 	};
 
-	private SteamUtilsCallback utilsCallback = new SteamUtilsCallback() {
-		@Override
-		public void onSteamShutdown() {
-			System.out.println("Steam client wants to shut down!");
-		}
-	};
+	private final SteamUtilsCallback utilsCallback = () -> System.out.println("Steam client wants to shut down!");
 
 	@Override
 	protected void registerInterfaces() {
@@ -463,9 +467,9 @@ public class SteamClientAPITest extends SteamTestApp {
 	}
 
 	@Override
-	protected void processInput(String input) throws SteamException {
+	protected void processInput(final String input) throws SteamException {
 		if (input.startsWith("stats global ")) {
-			String[] cmd = input.substring("stats global ".length()).split(" ");
+			final String[] cmd = input.substring("stats global ".length()).split(" ");
 			if (cmd.length > 0) {
 				if (cmd[0].equals("request")) {
 					int days = 0;
@@ -479,14 +483,14 @@ public class SteamClientAPITest extends SteamTestApp {
 						days = Integer.parseInt(cmd[2]);
 					}
 					if (days == 0) {
-						long value = userStats.getGlobalStat(cmd[1], -1);
+						final long value = userStats.getGlobalStat(cmd[1], -1);
 						System.out.println("global stat (L) '" + cmd[1] + "' = " + value);
 					} else {
-						long[] data = new long[days];
-						int count = userStats.getGlobalStatHistory(cmd[1], data);
+						final long[] data = new long[days];
+						final int count = userStats.getGlobalStatHistory(cmd[1], data);
 						System.out.print("global stat history (L) for " + count + " of " + days + " days:");
 						for (int i = 0; i < count; i++) {
-							System.out.print(" " + Long.toString(data[i]));
+							System.out.print(" " + data[i]);
 						}
 						System.out.println();
 					}
@@ -496,14 +500,14 @@ public class SteamClientAPITest extends SteamTestApp {
 						days = Integer.parseInt(cmd[2]);
 					}
 					if (days == 0) {
-						double value = userStats.getGlobalStat(cmd[1], -1.0);
+						final double value = userStats.getGlobalStat(cmd[1], -1.0);
 						System.out.println("global stat (D) '" + cmd[1] + "' = " + value);
 					} else {
-						double[] data = new double[days];
-						int count = userStats.getGlobalStatHistory(cmd[1], data);
+						final double[] data = new double[days];
+						final int count = userStats.getGlobalStatHistory(cmd[1], data);
 						System.out.print("global stat history (D) for " + count + " of " + days + " days:");
 						for (int i = 0; i < count; i++) {
-							System.out.print(" " + Double.toString(data[i]));
+							System.out.print(" " + data[i]);
 						}
 						System.out.println();
 					}
@@ -514,68 +518,68 @@ public class SteamClientAPITest extends SteamTestApp {
 		} else if (input.equals("stats store")) {
 			userStats.storeStats();
 		} else if (input.startsWith("achievement set ")) {
-			String achievementName = input.substring("achievement set ".length());
+			final String achievementName = input.substring("achievement set ".length());
 			System.out.println("- setting " + achievementName + " to 'achieved'");
 			userStats.setAchievement(achievementName);
 		} else if (input.startsWith("achievement clear ")) {
-			String achievementName = input.substring("achievement clear ".length());
+			final String achievementName = input.substring("achievement clear ".length());
 			System.out.println("- clearing " + achievementName);
 			userStats.clearAchievement(achievementName);
 		} else if (input.equals("file list")) {
-			int numFiles = remoteStorage.getFileCount();
+			final int numFiles = remoteStorage.getFileCount();
 			System.out.println("Num of files: " + numFiles);
 
 			for (int i = 0; i < numFiles; i++) {
-				int[] sizes = new int[1];
-				String file = remoteStorage.getFileNameAndSize(i, sizes);
-				boolean exists = remoteStorage.fileExists(file);
+				final int[] sizes = new int[1];
+				final String file = remoteStorage.getFileNameAndSize(i, sizes);
+				final boolean exists = remoteStorage.fileExists(file);
 				System.out.println("# " + i + " : name=" + file + ", size=" + sizes[0] + ", exists=" + (exists ? "yes" : "no"));
 			}
 		} else if (input.startsWith("file write ")) {
-			String path = input.substring("file write ".length());
-			File file = new File(path);
-			try (FileInputStream in = new FileInputStream(file)) {
-				SteamUGCFileWriteStreamHandle remoteFile = remoteStorage.fileWriteStreamOpen(path);
+			final String path = input.substring("file write ".length());
+			final File file = new File(path);
+			try (final FileInputStream in = new FileInputStream(file)) {
+				final SteamUGCFileWriteStreamHandle remoteFile = remoteStorage.fileWriteStreamOpen(path);
 				if (remoteFile != null) {
-					byte[] bytes = new byte[1024];
+					final byte[] bytes = new byte[1024];
 					int bytesRead;
 					while ((bytesRead = in.read(bytes, 0, bytes.length)) > 0) {
-						ByteBuffer buffer = ByteBuffer.allocateDirect(bytesRead);
+						final ByteBuffer buffer = ByteBuffer.allocateDirect(bytesRead);
 						buffer.put(bytes, 0, bytesRead);
 						buffer.flip();
 						remoteStorage.fileWriteStreamWriteChunk(remoteFile, buffer);
 					}
 					remoteStorage.fileWriteStreamClose(remoteFile);
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 		} else if (input.startsWith("file create")) {
 			ugc.createItem(utils.getAppID(), SteamRemoteStorage.WorkshopFileType.Community);
 		} else if (input.startsWith("file delete ")) {
-			String path = input.substring("file delete ".length());
+			final String path = input.substring("file delete ".length());
 			if (remoteStorage.fileDelete(path)) {
 				System.out.println("deleted file '" + path + "'");
 			}
 		} else if (input.startsWith("file share ")) {
 			remoteStorage.fileShare(input.substring("file share ".length()));
 		} else if (input.startsWith("file publish ")) {
-			String[] paths = input.substring("file publish ".length()).split(" ");
+			final String[] paths = input.substring("file publish ".length()).split(" ");
 			if (paths.length >= 2) {
 				System.out.println("publishing file: " + paths[0] + ", preview file: " + paths[1]);
 				remoteStorage.publishWorkshopFile(paths[0], paths[1], utils.getAppID(),
-						"Test UGC!", "Dummy UGC file published by test application.",
-						SteamRemoteStorage.PublishedFileVisibility.Private, null,
-						SteamRemoteStorage.WorkshopFileType.Community);
+												  "Test UGC!", "Dummy UGC file published by test application.",
+												  SteamRemoteStorage.PublishedFileVisibility.Private, null,
+												  SteamRemoteStorage.WorkshopFileType.Community);
 			}
 		} else if (input.startsWith("file republish ")) {
-			String[] paths = input.substring("file republish ".length()).split(" ");
+			final String[] paths = input.substring("file republish ".length()).split(" ");
 			if (paths.length >= 3) {
 				System.out.println("republishing id: " + paths[0] + ", file: " + paths[1] + ", preview file: " + paths[2]);
 
-				SteamPublishedFileID fileID = new SteamPublishedFileID(Long.parseLong(paths[0]));
+				final SteamPublishedFileID fileID = new SteamPublishedFileID(Long.parseLong(paths[0]));
 
-				SteamPublishedFileUpdateHandle updateHandle = remoteStorage.createPublishedFileUpdateRequest(fileID);
+				final SteamPublishedFileUpdateHandle updateHandle = remoteStorage.createPublishedFileUpdateRequest(fileID);
 				if (updateHandle != null) {
 					remoteStorage.updatePublishedFileFile(updateHandle, paths[1]);
 					remoteStorage.updatePublishedFilePreviewFile(updateHandle, paths[2]);
@@ -585,9 +589,9 @@ public class SteamClientAPITest extends SteamTestApp {
 				}
 			}
 		} else if (input.equals("ugc query")) {
-			SteamUGCQuery query = ugc.createQueryUserUGCRequest(user.getSteamID().getAccountID(), SteamUGC.UserUGCList.Subscribed,
-					SteamUGC.MatchingUGCType.UsableInGame, SteamUGC.UserUGCListSortOrder.TitleAsc,
-					utils.getAppID(), utils.getAppID(), 1);
+			final SteamUGCQuery query = ugc.createQueryUserUGCRequest(user.getSteamID().getAccountID(), SteamUGC.UserUGCList.Subscribed,
+																	  SteamUGC.MatchingUGCType.UsableInGame, SteamUGC.UserUGCListSortOrder.TitleAsc,
+																	  utils.getAppID(), utils.getAppID(), 1);
 
 			if (query.isValid()) {
 				System.out.println("sending UGC query: " + query.toString());
@@ -595,78 +599,78 @@ public class SteamClientAPITest extends SteamTestApp {
 				ugc.sendQueryUGCRequest(query);
 			}
 		} else if (input.startsWith("ugc download ")) {
-			String name = input.substring("ugc download ".length());
-			SteamUGCHandle handle = new SteamUGCHandle(Long.parseLong(name, 16));
+			final String name = input.substring("ugc download ".length());
+			final SteamUGCHandle handle = new SteamUGCHandle(Long.parseLong(name, 16));
 			remoteStorage.ugcDownload(handle, 0);
 		} else if (input.startsWith("ugc subscribe ")) {
-			Long id = Long.parseLong(input.substring("ugc subscribe ".length()), 16);
+			final long id = Long.parseLong(input.substring("ugc subscribe ".length()), 16);
 			ugc.subscribeItem(new SteamPublishedFileID(id));
 		} else if (input.startsWith("ugc unsubscribe ")) {
-			Long id = Long.parseLong(input.substring("ugc unsubscribe ".length()), 16);
+			final long id = Long.parseLong(input.substring("ugc unsubscribe ".length()), 16);
 			ugc.unsubscribeItem(new SteamPublishedFileID(id));
 		} else if (input.startsWith("ugc state ")) {
-			Long id = Long.parseLong(input.substring("ugc state ".length()), 16);
-			Collection<SteamUGC.ItemState> itemStates = ugc.getItemState(new SteamPublishedFileID(id));
+			final long id = Long.parseLong(input.substring("ugc state ".length()), 16);
+			final Collection<SteamUGC.ItemState> itemStates = ugc.getItemState(new SteamPublishedFileID(id));
 			System.out.println("UGC item states: " + itemStates.size());
-			for (SteamUGC.ItemState itemState : itemStates) {
+			for (final SteamUGC.ItemState itemState : itemStates) {
 				System.out.println("  " + itemState.name());
 			}
 		} else if (input.startsWith("ugc details ")) {
 			System.out.println("requesting UGC details (deprecated API call)");
-			Long id = Long.parseLong(input.substring("ugc details ".length()), 16);
+			final long id = Long.parseLong(input.substring("ugc details ".length()), 16);
 			ugc.requestUGCDetails(new SteamPublishedFileID(id), 0);
 
-			SteamUGCQuery query = ugc.createQueryUGCDetailsRequest(new SteamPublishedFileID(id));
+			final SteamUGCQuery query = ugc.createQueryUGCDetailsRequest(new SteamPublishedFileID(id));
 			if (query.isValid()) {
 				System.out.println("sending UGC details query: " + query.toString());
 				ugc.sendQueryUGCRequest(query);
 			}
 		} else if (input.startsWith("ugc info ")) {
-			Long id = Long.parseLong(input.substring("ugc info ".length()), 16);
-			SteamUGC.ItemInstallInfo installInfo = new SteamUGC.ItemInstallInfo();
+			final long id = Long.parseLong(input.substring("ugc info ".length()), 16);
+			final SteamUGC.ItemInstallInfo installInfo = new SteamUGC.ItemInstallInfo();
 			if (ugc.getItemInstallInfo(new SteamPublishedFileID(id), installInfo)) {
 				System.out.println("  folder: " + installInfo.getFolder());
 				System.out.println("  size on disk: " + installInfo.getSizeOnDisk());
 			}
-			SteamUGC.ItemDownloadInfo downloadInfo = new SteamUGC.ItemDownloadInfo();
+			final SteamUGC.ItemDownloadInfo downloadInfo = new SteamUGC.ItemDownloadInfo();
 			if (ugc.getItemDownloadInfo(new SteamPublishedFileID(id), downloadInfo)) {
 				System.out.println("  bytes downloaded: " + downloadInfo.getBytesDownloaded());
 				System.out.println("  bytes total: " + downloadInfo.getBytesTotal());
 			}
 		} else if (input.startsWith("leaderboard find ")) {
-			String name = input.substring("leaderboard find ".length());
+			final String name = input.substring("leaderboard find ".length());
 			userStats.findLeaderboard(name);
 		} else if (input.startsWith("leaderboard list ")) {
-			String[] params = input.substring("leaderboard list ".length()).split(" ");
+			final String[] params = input.substring("leaderboard list ".length()).split(" ");
 			if (currentLeaderboard != null && params.length >= 2) {
 				userStats.downloadLeaderboardEntries(currentLeaderboard,
 						SteamUserStats.LeaderboardDataRequest.Global,
 						Integer.parseInt(params[0]), Integer.parseInt(params[1]));
 			}
 		} else if (input.startsWith("leaderboard users ")) {
-			String[] params = input.substring("leaderboard users ".length()).split(" ");
+			final String[] params = input.substring("leaderboard users ".length()).split(" ");
 			if (currentLeaderboard != null && params.length > 0) {
-				SteamID[] users = new SteamID[params.length];
+				final SteamID[] users = new SteamID[params.length];
 				for (int i = 0; i < params.length; i++) {
 					users[i] = SteamID.createFromNativeHandle(Long.parseLong(params[i]));
 				}
 				userStats.downloadLeaderboardEntriesForUsers(currentLeaderboard, users);
 			}
 		} else if (input.startsWith("leaderboard score ")) {
-			String score = input.substring("leaderboard score ".length());
+			final String score = input.substring("leaderboard score ".length());
 			if (currentLeaderboard != null) {
 				System.out.println("uploading score " + score + " to leaderboard " + currentLeaderboard.toString());
 				userStats.uploadLeaderboardScore(currentLeaderboard,
 						SteamUserStats.LeaderboardUploadScoreMethod.KeepBest, Integer.parseInt(score), new int[] {});
 			}
 		} else if (input.startsWith("apps subscribed ")) {
-			String appId = input.substring("apps subscribed ".length());
-			boolean subscribed = apps.isSubscribedApp(Integer.parseInt(appId));
+			final String appId = input.substring("apps subscribed ".length());
+			final boolean subscribed = apps.isSubscribedApp(Integer.parseInt(appId));
 			System.out.println("user described to app #" + appId + ": " + (subscribed ? "yes" : "no"));
 		}
 	}
 
-	public static void main(String[] arguments) {
+	public static void main(final String[] arguments) {
 		new SteamClientAPITest().clientMain(arguments);
 	}
 
