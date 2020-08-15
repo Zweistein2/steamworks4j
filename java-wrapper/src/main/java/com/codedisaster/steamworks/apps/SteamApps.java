@@ -120,7 +120,7 @@ public class SteamApps extends SteamInterface {
 		return new SteamAPICall(getFileDetails(pointer, callback, fileName));
 	}
 
-	public int getInstalledDepots(final int appID, final Integer[] depotIDs, final int maxDepots) {
+	public int getInstalledDepots(final int appID, final int[] depotIDs, final int maxDepots) {
 		return getInstalledDepots(pointer, appID, depotIDs, maxDepots);
 	}
 
@@ -160,6 +160,10 @@ public class SteamApps extends SteamInterface {
 
 	public void uninstallDLC(final int appID) {
 		uninstallDLC(pointer, appID);
+	}
+
+	public boolean isTimedTrial(final int[] secondsAllowed, final int[] secondsPlayed) {
+		return isTimedTrial(pointer, secondsAllowed, secondsPlayed);
 	}
 
 	// @off
@@ -304,7 +308,7 @@ public class SteamApps extends SteamInterface {
 		return handle;
 	*/
 
-	private static native int getInstalledDepots(long pointer, int appID, Integer[] depotIDs, int maxDepots); /*
+	private static native int getInstalledDepots(long pointer, int appID, int[] depotIDs, int maxDepots); /*
 		ISteamApps* apps = (ISteamApps*) pointer;
 		return apps->GetInstalledDepots((AppId_t) appID, (DepotId_t*) depotIDs, maxDepots);
 	*/
@@ -353,4 +357,8 @@ public class SteamApps extends SteamInterface {
 		apps->UninstallDLC((AppId_t) appID);
     */
 
+	private static native boolean isTimedTrial(long pointer, int[] secondsAllowed, int[] secondsPlayed); /*
+		ISteamApps* apps = (ISteamApps*) pointer;
+		return apps->BIsTimedTrial((uint32*) secondsAllowed, (uint32*) secondsPlayed);
+    */
 }
