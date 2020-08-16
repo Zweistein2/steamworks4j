@@ -120,8 +120,8 @@ public class NativeCodeGenerator {
         final File newFile = new File(jniDir.path() + "/" + className + ".h ");
         final boolean success = oldFile.renameTo(newFile);
 
-        if(success) {
-            System.out.print("File: " + oldFile.getName() + " renamed to: " + newFile.getName());
+        if(!success) {
+            System.out.print("Renaming for File: " + oldFile.getName() + " to: " + newFile.getName() + " failed!");
         }
     }
 
