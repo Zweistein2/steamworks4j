@@ -1,6 +1,9 @@
 package com.codedisaster.steamworks.utils;
 
-import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.SteamAPI;
+import com.codedisaster.steamworks.SteamAPICall;
+import com.codedisaster.steamworks.SteamException;
+import com.codedisaster.steamworks.SteamInterface;
 
 import java.nio.ByteBuffer;
 
@@ -37,10 +40,12 @@ public class SteamUtils extends SteamInterface {
 		BottomRight
 	}
 
-	private SteamUtilsCallbackAdapter callbackAdapter;
+	private final SteamUtilsCallbackAdapter callbackAdapter;
 
 	public SteamUtils(final SteamUtilsCallback callback) {
-		super(SteamAPI.getSteamUtilsPointer(), createCallback(new SteamUtilsCallbackAdapter(callback)));
+		super(SteamAPI.getSteamUtilsPointer());
+		callbackAdapter = new SteamUtilsCallbackAdapter(callback);
+		setCallback(createCallback(callbackAdapter));
 	}
 
 	public int getSecondsSinceAppActive() {
@@ -96,7 +101,7 @@ public class SteamUtils extends SteamInterface {
 
 	public void setWarningMessageHook(final SteamAPIWarningMessageHook messageHook) {
 		callbackAdapter.setWarningMessageHook(messageHook);
-		enableWarningMessageHook(this.callback, messageHook != null);
+		enableWarningMessageHook(callback, messageHook != null);
 	}
 
 	public boolean isOverlayEnabled() {
