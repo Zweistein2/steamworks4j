@@ -20,6 +20,10 @@ abstract public class SteamInterface extends SteamAPI {
 		this.callback = callback;
 	}
 
+	protected void setCallback(final long callback) {
+		this.callback = callback;
+	}
+
 	public void dispose() {
 		deleteCallback(callback);
 	}

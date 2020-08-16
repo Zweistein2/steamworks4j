@@ -1,7 +1,9 @@
 package com.codedisaster.steamworks.test;
 
 import com.codedisaster.steamworks.*;
+import com.codedisaster.steamworks.apps.RegisterActivationCodeResult;
 import com.codedisaster.steamworks.apps.SteamApps;
+import com.codedisaster.steamworks.apps.SteamAppsCallback;
 import com.codedisaster.steamworks.friends.SteamFriends;
 import com.codedisaster.steamworks.friends.SteamFriendsCallback;
 import com.codedisaster.steamworks.remotestorage.SteamPublishedFileUpdateHandle;
@@ -14,9 +16,11 @@ import com.codedisaster.steamworks.userstats.*;
 import com.codedisaster.steamworks.utils.SteamUtils;
 import com.codedisaster.steamworks.utils.SteamUtilsCallback;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collection;
 
 public class SteamClientAPITest extends SteamTestApp {
 
@@ -364,6 +368,38 @@ public class SteamClientAPITest extends SteamTestApp {
 		}
 	};
 
+	private final SteamAppsCallback appsCallback = new SteamAppsCallback() {
+		@Override
+		public void onSteamAppsFileDetailsResult(final SteamResult result, final long fileSize, final byte[] fileSHA, final int flags) {
+
+		}
+
+		@Override
+		public void onSteamAppsDlcInstalled(final int appID) {
+
+		}
+
+		@Override
+		public void onSteamAppsNewUrlLaunchParameters() {
+
+		}
+
+		@Override
+		public void onSteamAppsTimedTrialStatus(final int appID, final boolean isOffline, final int secondsAllowed, final int secondsPlayed) {
+
+		}
+
+		@Override
+		public void onSteamAppsRegisterActivationCodeResponse(final RegisterActivationCodeResult result, final int packageRegistered) {
+
+		}
+
+		@Override
+		public void onSteamAppsAppProofOfPurchaseKeyResponse(final SteamResult result, final int appID, final int keyLength, final String key) {
+
+		}
+	};
+
 	private final SteamFriendsCallback friendsCallback = new SteamFriendsCallback() {
 		@Override
 		public void onSetPersonaNameResponse(final boolean success, final boolean localSuccess, final SteamResult result) {
@@ -433,7 +469,7 @@ public class SteamClientAPITest extends SteamTestApp {
 		utils = new SteamUtils(utilsCallback);
 
 		System.out.println("Register Apps ...");
-		apps = new SteamApps();
+		apps = new SteamApps(appsCallback);
 
 		System.out.println("Register Friends ...");
 		friends = new SteamFriends(friendsCallback);

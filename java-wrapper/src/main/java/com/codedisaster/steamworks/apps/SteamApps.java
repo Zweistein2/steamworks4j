@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 public class SteamApps extends SteamInterface {
 
-	public SteamApps() {
-		super(SteamAPI.getSteamAppsPointer());
+	public SteamApps(final SteamAppsCallback callback) {
+		super(SteamAPI.getSteamAppsPointer(), createCallback(new SteamAppsCallbackAdapter(callback)));
 	}
 
 	public boolean getDLCDataByIndex(final int index, final List<Integer> appIDs, final List<Boolean> dlcAvailables, final List<String> values, final int valueBufferSize) {
@@ -68,10 +68,12 @@ public class SteamApps extends SteamInterface {
 		return getAppBuildId(pointer);
 	}
 
-	public int getAppInstallDir(final int appID, final List<String> folders, final int folderBufferSize) {
+	public int getAppInstallDir(final int appID, final List<String> folders) {
 		final SteamStringValue value = new SteamStringValue();
 
-		final int copiedBytes = getAppInstallDir(pointer, appID, value, folderBufferSize);
+		final int folderSize = getAppInstallDir(pointer, appID, new SteamStringValue(), 0);
+
+		final int copiedBytes = getAppInstallDir(pointer, appID, value, folderSize);
 
 		if(copiedBytes > 0) {
 			folders.add(value.getValue());
@@ -120,14 +122,16 @@ public class SteamApps extends SteamInterface {
 		return new SteamAPICall(getFileDetails(pointer, callback, fileName));
 	}
 
-	public int getInstalledDepots(final int appID, final Integer[] depotIDs, final int maxDepots) {
+	public int getInstalledDepots(final int appID, final int[] depotIDs, final int maxDepots) {
 		return getInstalledDepots(pointer, appID, depotIDs, maxDepots);
 	}
 
-	public int getLaunchCommandLine(final List<String> commandLines, final int commandLineSizeBuffer) {
+	public int getLaunchCommandLine(final List<String> commandLines) {
 		final SteamStringValue value = new SteamStringValue();
 
-		final int copiedBytes = getLaunchCommandLine(pointer, value, commandLineSizeBuffer);
+		final int commandLineSize = getLaunchCommandLine(pointer, new SteamStringValue(), 0);
+
+		final int copiedBytes = getLaunchCommandLine(pointer, value, commandLineSize);
 
 		if(copiedBytes > 0) {
 			commandLines.add(value.getValue());
@@ -162,12 +166,20 @@ public class SteamApps extends SteamInterface {
 		uninstallDLC(pointer, appID);
 	}
 
+	public boolean isTimedTrial(final int[] secondsAllowed, final int[] secondsPlayed) {
+		return isTimedTrial(pointer, secondsAllowed, secondsPlayed);
+	}
+
 	// @off
 
 	/*JNI
-		#include <steam_api.h>
 		#include "SteamAppsCallback.h"
+		#include <steam_api.h>
 		#include <vector>
+	*/
+
+	private static native long createCallback(SteamAppsCallbackAdapter javaCallback); /*
+		return (intp) new SteamAppsCallback(env, javaCallback);
 	*/
 
 	private static native boolean getDLCDataByIndex(long pointer, int index, Integer[] appID, Boolean[] available, SteamStringValue value, int valueBufferSize); /*
@@ -304,7 +316,7 @@ public class SteamApps extends SteamInterface {
 		return handle;
 	*/
 
-	private static native int getInstalledDepots(long pointer, int appID, Integer[] depotIDs, int maxDepots); /*
+	private static native int getInstalledDepots(long pointer, int appID, int[] depotIDs, int maxDepots); /*
 		ISteamApps* apps = (ISteamApps*) pointer;
 		return apps->GetInstalledDepots((AppId_t) appID, (DepotId_t*) depotIDs, maxDepots);
 	*/
@@ -353,4 +365,8 @@ public class SteamApps extends SteamInterface {
 		apps->UninstallDLC((AppId_t) appID);
     */
 
+	private static native boolean isTimedTrial(long pointer, int[] secondsAllowed, int[] secondsPlayed); /*
+		ISteamApps* apps = (ISteamApps*) pointer;
+		return apps->BIsTimedTrial((uint32*) secondsAllowed, (uint32*) secondsPlayed);
+    */
 }
