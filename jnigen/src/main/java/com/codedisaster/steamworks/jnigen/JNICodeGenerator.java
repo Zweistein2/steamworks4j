@@ -1,11 +1,8 @@
 package com.codedisaster.steamworks.jnigen;
 
-import com.badlogic.gdx.jnigen.NativeCodeGenerator;
-
 public class JNICodeGenerator {
 
-	public static void main(String[] arguments) {
-
+	public static void main(final String[] arguments) {
 		try {
 			new NativeCodeGenerator().generate(
 					"java-wrapper/src/main/java",
@@ -21,11 +18,10 @@ public class JNICodeGenerator {
 					new String[] { "**/*Native.java" },
 					null);
 
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
 
 	}
-
 }

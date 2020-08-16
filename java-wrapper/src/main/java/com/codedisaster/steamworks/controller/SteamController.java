@@ -3,6 +3,15 @@ package com.codedisaster.steamworks.controller;
 import com.codedisaster.steamworks.SteamAPI;
 import com.codedisaster.steamworks.SteamInterface;
 
+/**
+ * Steam Controller support API.
+ *
+ * This API has been deprecated in favor of ISteamInput
+ * - please see ISteamInput Interface for info
+ *
+ * @deprecated
+ */
+@Deprecated(since = "2.0.0")
 public class SteamController extends SteamInterface {
 
 	public enum Pad {
